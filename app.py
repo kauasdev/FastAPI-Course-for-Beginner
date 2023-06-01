@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Path
+from typing import Optional
 import uvicorn
 
 
@@ -33,6 +34,16 @@ def get_student(
         return students[student_id]
     except KeyError:
         return {'error': 'Not found...'}
+
+
+@app.get('/get-by-name')
+def get_student(name: Optional[str] = None):
+    # api/get-by-name?name=kaua
+    for student_id in students:
+        if students[student_id]['name'] == name:
+            return students[student_id]
+
+    return {'error': 'Not found...'}
 
 
 if __name__ == '__main__':
