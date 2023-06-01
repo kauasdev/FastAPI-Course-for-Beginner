@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Path
 from typing import Optional
+from pydantic import BaseModel
 import uvicorn
 
 
@@ -13,10 +14,17 @@ students = {
     1: {
         'name': 'kaua',
         'age': 16,
-        'n°': 22,
-        'class': 'Year 12'
+        'number': 22,
+        'year': 'Year 12'
     }
 }
+
+
+class Student(BaseModel):
+    name: str
+    age: int
+    number: int
+    year: str
 
 
 @app.get('/')
@@ -38,7 +46,7 @@ def get_student(
 
 
 @app.get('/get-by-name')
-def get_student(*, name: Optional[str] = None, test: int, x: int):
+def get_student(*, name: Optional[str] = None):
     # Optional[X] == X | None
     # api/get-by-name?name=kaua
     # * => All parameters must be passed by key and value (?param=value)
@@ -53,8 +61,17 @@ def get_student(*, name: Optional[str] = None, test: int, x: int):
 def get_student(*, name: Optional[str], student_number: int):
     # api/get-by-number/kaua?student_number=22
     for student_id in students:
-        if students[student_id]['name'] == name and students[student_id]['n°'] == student_number:
+        if students[student_id]['name'] == name and students[student_id]['number'] == student_number:
             return students[student_id]
+
+
+@app.post('/create-student/{student_id}')
+def create_student(student_id: int, student: Student):
+    if student_id in students:
+        return {'error': 'Student exists...'}
+
+    students[student_id] = student.dict()
+    return students[student_id]
 
 
 if __name__ == '__main__':
