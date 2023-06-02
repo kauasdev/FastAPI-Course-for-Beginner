@@ -39,6 +39,11 @@ def index():
     return {'Data': 'Welcome to API!'}
 
 
+@app.get('/student-list')
+def student_list():
+    return students
+
+
 @app.get('/get-student/{student_id}')
 def get_student(
         student_id: int = Path(description='The ID of the student you want to view', gt=0, lt=3)
@@ -108,6 +113,15 @@ def update_user(student_id: int, student: UpdateStudent):
     students[student_id] = student
 
     return students[student_id]
+
+
+@app.delete('/delete-student/{student_id}')
+def delete_student(student_id: int):
+    if student_id not in students:
+        return {'Error': 'Student does not exist'}
+
+    del students[student_id]
+    return {'Message': 'Student deleted successfully'}
 
 
 if __name__ == '__main__':
