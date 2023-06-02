@@ -27,6 +27,13 @@ class Student(BaseModel):
     year: str
 
 
+class UpdateStudent(BaseModel):
+    name: Optional[str] = None
+    age: Optional[int] = None
+    year: Optional[str] = None
+    number: Optional[int] = None
+
+
 @app.get('/')
 def index():
     return {'Data': 'Welcome to API!'}
@@ -42,7 +49,7 @@ def get_student(
     try:
         return students[student_id]
     except KeyError:
-        return {'error': 'Not found...'}
+        return {'Error': 'Not found...'}
 
 
 @app.get('/get-by-name')
@@ -54,7 +61,7 @@ def get_student(*, name: Optional[str] = None):
         if students[student_id]['name'] == name:
             return students[student_id]
 
-    return {'error': 'Not found...'}
+    return {'Error': 'Not found...'}
 
 
 @app.get('/get-by-number/{name}')
@@ -68,9 +75,38 @@ def get_student(*, name: Optional[str], student_number: int):
 @app.post('/create-student/{student_id}')
 def create_student(student_id: int, student: Student):
     if student_id in students:
-        return {'error': 'Student exists...'}
+        return {'Error': 'Student exists...'}
 
     students[student_id] = student.dict()
+    return students[student_id]
+
+
+@app.put('/update-student/{student_id}')
+def update_student(student_id: int, student: UpdateStudent):
+    if student_id not in students:
+        return {'Error': 'Student does not exist...'}
+    students[student_id] = student.dict()
+
+    for key, value in student:
+        if student.dict()[key] is not None:
+            students[student_id][key] = value
+
+    return students[student_id]
+
+
+@app.patch('/update-student/{student_id}')
+def update_user(student_id: int, student: UpdateStudent):
+    if student_id not in students:
+        return {'Error': 'Student does not exist...'}
+
+    old_student_data = students[student_id].copy()
+    update_student_data = student.dict(exclude_unset=True)
+    old_student_data.update(update_student_data)
+
+    student = old_student_data.copy()
+
+    students[student_id] = student
+
     return students[student_id]
 
 
